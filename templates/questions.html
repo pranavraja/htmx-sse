@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<style>
+aside {
+    float: right;
+    border: thin solid black;
+    overflow-y: scroll;
+    min-width: 10rem;
+    min-height: 95vh;
+}
+</style>
+<aside hx-sse="connect:/events swap:message" hx-swap="beforeend">
+</aside>
+<main>
+<script src="https://jgoboard.com/static/jgoboard/dist/jgoboard-latest.js"></script>
+<script src="https://jgoboard.com/static/jgoboard/medium/board.js"></script>
+{{ define "input" }}
+    <input id="answer" maxlength="20" type="text" name="answer" placeholder="{{ . }}">
+{{ end }}
+<form hx-post="/quiz" hx-swap="none" hx-trigger="submit">
+{{ if eq .Question 0 }}
+<header>
+	<h2>Welcome to Pmoney's impossible quiz</h2>
+    <p><b>Rules</b>:</p>
+    <ul>
+        <li>1 point for the first correct answer</li>
+        <li>Google all you want, guess as many times as you want</li>
+        <li>Everyone can see all your guesses though</li>
+        <li>If you answer correctly, you have to explain why. If you can't explain why, you lose a point.</li>
+    </ul>
+    <p>Tip: If something goes wrong, refreshing the page should fix it. You won't lose progress on the quiz, since the state is server-side.</p>
+    <p></p>
+	<p>Waiting for pmoney to start this once in a lifetime event...</p>
+</header>
+{{ else if eq .Question 1 }}
+    <h2>Question 1</h2>
+	<p>What is the 9 letter anagram?</p>
+    <p><img src="/static/images/target.png" alt="RDE VUT ANE"></p>
+    {{ template "input" "the 9 letter word" }}
+	<button type="submit">I solved it</button>
+    <section id="answer-1"></section>
+{{ else if eq .Question 2 }}
+    <h2>Question 2</h2>
+    <p>White and black take turns placing one stone on the board. White can win by surrounding black's stones.</p>
+    <p>What is the correct next move to ensure victory?</p>
+    <div class="jgoboard" data-jgostyle="JGO.BOARD.mediumBW">
+        .o..x....
+        xxxxxo.o.
+        o...oo...
+        .o.o.....
+        .........
+    </div>
+    <script>
+        JGO.auto.init(document, JGO);
+    </script>
+    <p>
+        {{ template "input" "coordinates" }}
+        <button type="submit">Try it</button>
+    </p>
+    <p>If you need a hint, check out the <a href="https://en.wikipedia.org/wiki/Rules_of_Go#Concise_statement" target="_blank">Concise rules of Go</a>.</p>
+    <section id="answer-2"></section>
+{{ else }}
+    <h2>You have reached the end of the pmoney quiz</h2>
+    <p>Thanks for playing!</p>
+{{ end }}
+</form>
+</main>
+<script src="https://unpkg.com/htmx.org@1.8.4" integrity="sha384-wg5Y/JwF7VxGk4zLsJEcAojRtlVp1FKKdGy1qN+OMtdq72WRvX/EdRdqg/LOhYeV" crossorigin="anonymous"></script>
+<script>
+htmx.on('aside', 'htmx:load', function (e) {
+    if (e.currentTarget.lastChild) {
+        e.currentTarget.lastChild.scrollIntoView(false);
+    }
+});
+htmx.on('main', 'htmx:afterRequest', function (e) {
+    e.currentTarget.querySelector('form').reset();
+})
+const params = new URLSearchParams(document.location.search);
+// Support an ?access_token query param, to allow sending people pre-authenticated links,
+// avoiding the need to build a full login system
+const token = params.get('access_token');
+if (token) {
+    document.cookie = `JSESSIONID=${token};path=/`;
+}
+</script>
+</body>

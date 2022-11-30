@@ -1,0 +1,13 @@
+<div>(answer revealed)</div>
+{{ if eq .Data "1" }}
+<section id="answer-1" hx-swap-oob="true">
+    <h2>Answer</h2>
+    <p><b>ADVENTURE</b></p>
+</section>
+{{ else if eq .Data "2" }}
+<section id="answer-2" hx-swap-oob="true">
+    <h2>Answer</h2>
+    <p>The answer is <b>c5</b>. After <b>f5 g5</b> black cannot escape (<b>d5</b> leads to <b>a5</b>, <b>c3</b> leads to <b>d3</b>).</p>
+    <p>Note that playing <b>d5</b> first is incorrect as then black can play <b>c5</b>, surrounding d5 and preventing a5 or d5 in the future.</p>
+</section>
+{{ end }}
