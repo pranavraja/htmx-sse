@@ -31,5 +31,5 @@ func (a authenticator) Username(r *http.Request) (string, error) {
 		}
 		return claims.Name, nil
 	}
-	return "", nil
+	return "", fmt.Errorf("missing cookie")
 }

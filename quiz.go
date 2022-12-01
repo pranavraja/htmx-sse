@@ -44,17 +44,19 @@ func (q *quizHandler) check(questionNumber int64, answer string) bool {
 
 func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	questionNumber := atomic.LoadInt64(&q.question)
-	switch r.Method {
-	case http.MethodPost:
-		answer := strings.TrimSpace(r.FormValue("answer"))
-		name, err := q.auth.Username(r)
-		if err != nil {
+	name, err := q.auth.Username(r)
+	if err != nil {
+		if q.admin(r) {
+			// we'll allow it since you're admin
+			name = "admin"
+		} else {
 			http.Error(w, "couldn't authenticate you: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		if name == "" {
-			name = "anonymous"
-		}
+	}
+	switch r.Method {
+	case http.MethodPost:
+		answer := strings.TrimSpace(r.FormValue("answer"))
 		log.Printf("question %d: attempt from %s: %s", questionNumber, name, answer)
 		if q.closed.Load() {
 			return
