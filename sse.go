@@ -14,9 +14,10 @@ type sseHandler struct {
 }
 
 type quizEvent struct {
-	Type string
-	From string
-	Data string
+	QuestionNumber int64
+	Type           string
+	From           string
+	Data           string
 }
 
 func (s sseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

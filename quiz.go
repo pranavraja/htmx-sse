@@ -61,9 +61,9 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		if q.check(questionNumber, answer) {
 			q.closed.Store(true)
-			q.sse.Broadcast(quizEvent{Type: "correct", From: name, Data: answer})
+			q.sse.Broadcast(quizEvent{QuestionNumber: questionNumber, Type: "correct", From: name, Data: answer})
 		} else {
-			q.sse.Broadcast(quizEvent{Type: "wrong", From: name, Data: answer})
+			q.sse.Broadcast(quizEvent{QuestionNumber: questionNumber, Type: "wrong", From: name, Data: answer})
 		}
 		w.WriteHeader(http.StatusNoContent)
 	default:

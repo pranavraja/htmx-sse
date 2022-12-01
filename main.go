@@ -25,6 +25,7 @@ func main() {
 
 	http.Handle("/events", h)
 	http.Handle("/quiz", q)
+	http.HandleFunc("/clear", func(w http.ResponseWriter, r *http.Request) {})
 	http.HandleFunc("/admin/", q.Admin)
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
 	port := os.Getenv("PORT")

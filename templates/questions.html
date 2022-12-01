@@ -6,18 +6,22 @@
 <style>
 body {
     max-width: 60rem;
-    margin: 0 auto;
+    margin: 1rem auto;
 }
 .correct {
     color: darkgreen;
     font-weight: bold;
 }
+.wrong {
+    color: darkred;
+    font-weight: bold;
+}
 aside {
     float: right;
     border: thin solid black;
-    overflow-y: scroll;
     min-width: 10rem;
-    min-height: 95vh;
+    height: 95vh;
+    overflow-y: scroll;
 }
 button {
     font-weight: bold;
@@ -120,8 +124,10 @@ button {
 <script src="https://unpkg.com/htmx.org@1.8.4" integrity="sha384-wg5Y/JwF7VxGk4zLsJEcAojRtlVp1FKKdGy1qN+OMtdq72WRvX/EdRdqg/LOhYeV" crossorigin="anonymous"></script>
 <script>
 htmx.on('aside', 'htmx:load', function (e) {
-    if (e.currentTarget.lastElementChild) {
-        e.currentTarget.lastElementChild.scrollIntoView(false);
+    const aside = e.currentTarget;
+    // scroll to end, but only if needed
+    if (aside.scrollHeight > aside.offsetHeight) {
+        aside.scrollTop = aside.scrollHeight - aside.offsetHeight;
     }
 });
 htmx.on('main', 'htmx:afterRequest', function (e) {
