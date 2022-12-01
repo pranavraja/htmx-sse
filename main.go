@@ -25,7 +25,7 @@ func main() {
 
 	http.Handle("/events", h)
 	http.Handle("/quiz", q)
-	http.HandleFunc("/admin/", auth.RestrictedHandler(q.Admin, "admin"))
+	http.HandleFunc("/admin/", q.Admin)
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -33,18 +33,3 @@ func (a authenticator) Username(r *http.Request) (string, error) {
 	}
 	return "", nil
 }
-
-func (a authenticator) RestrictedHandler(h http.HandlerFunc, username string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		name, err := a.Username(r)
-		if err != nil {
-			http.Error(w, "sorry, bad token "+err.Error(), http.StatusForbidden)
-			return
-		}
-		if name != "admin" {
-			http.Error(w, "sorry, you are not admin", http.StatusForbidden)
-			return
-		}
-		h.ServeHTTP(w, r)
-	}
-}
