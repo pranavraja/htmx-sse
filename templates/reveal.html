@@ -1,13 +1,38 @@
 <div>(answer revealed)</div>
 {{ if eq .Data "1" }}
-<section id="answer-1" hx-swap-oob="true">
+<section id="answer-{{ .Data }}" hx-swap-oob="true">
     <h2>Answer</h2>
     <p><b>ADVENTURE</b></p>
 </section>
 {{ else if eq .Data "2" }}
-<section id="answer-2" hx-swap-oob="true">
+<section id="answer-{{ .Data }}" hx-swap-oob="true">
     <h2>Answer</h2>
-    <p>The answer is <b>c5</b>. After <b>f5 g5</b> black cannot escape (<b>d5</b> leads to <b>a5</b>, <b>c3</b> leads to <b>d3</b>).</p>
+    <p>The <b><a href="https://en.wikipedia.org/wiki/Zune">Microsoft Zune</a></b>!</p>
+</section>
+{{ else if eq .Data "3" }}
+<section id="answer-{{ .Data }}" hx-swap-oob="true">
+    <h2>Answer</h2>
+    <p>An envelope.</p>
+</section>
+{{ else if eq .Data "4" }}
+<section id="answer-{{ .Data }}" hx-swap-oob="true">
+    <h2>Answer</h2>
+    <p>A coin.</p>
+</section>
+{{ else if eq .Data "5" }}
+<section id="answer-{{ .Data }}" hx-swap-oob="true">
+    <h2>Answer</h2>
+    <div class="jgoboard" data-jgostyle="JGO.BOARD.mediumBW">
+        .oo.x....
+        xxxxxo.o.
+        o...oo...
+        .o.o.....
+        .........
+    </div>
+    <script>
+        JGO.auto.init(document.getElementById('answer-{{ .Data }}'), JGO);
+    </script>
+    <p>The answer is <b>c5</b>. After <b>f5 g5</b> black cannot escape (if black tries <b>d5</b> instead, that leads to <b>a5</b>, <b>c3</b> leads to <b>d3</b>).</p>
     <p>Note that playing <b>d5</b> first is incorrect as then black can play <b>c5</b>, surrounding d5 and preventing a5 or d5 in the future.</p>
 </section>
 {{ end }}

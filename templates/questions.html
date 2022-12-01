@@ -4,6 +4,14 @@
 </head>
 <body>
 <style>
+body {
+    max-width: 60rem;
+    margin: 0 auto;
+}
+.correct {
+    color: darkgreen;
+    font-weight: bold;
+}
 aside {
     float: right;
     border: thin solid black;
@@ -36,16 +44,35 @@ aside {
 	<p>Waiting for pmoney to start this once in a lifetime event...</p>
 </header>
 {{ else if eq .Question 1 }}
-    <h2>Question 1</h2>
+    <h2>Question {{ .Question }} - for practice</h2>
 	<p>What is the 9 letter anagram?</p>
     <p><img src="/static/images/target.png" alt="RDE VUT ANE"></p>
     {{ template "input" "the 9 letter word" }}
 	<button type="submit">I solved it</button>
-    <section id="answer-1"></section>
+    <section id="answer-{{ .Question }}"></section>
 {{ else if eq .Question 2 }}
-    <h2>Question 2</h2>
+    <h2>Question {{ .Question }}</h2>
+    <p>What is this strange UI?</p>
+    <p><img src="/static/images/mysteriousdevice.jpeg" alt="A mysterious ancient technology"></p>
+    {{ template "input" "mysterious device" }}
+	<button type="submit">Easy</button>
+    <section id="answer-{{ .Question }}"></section>
+{{ else if eq .Question 3 }}
+    <h2>Question {{ .Question }}</h2>
+    <p>What starts with "e", ends with "e", but only has 1 letter?</p>
+    {{ template "input" "your answer" }}
+	<button type="submit">I know</button>
+    <section id="answer-{{ .Question }}"></section>
+{{ else if eq .Question 4 }}
+    <h2>Question {{ .Question }}</h2>
+    <p>What has a head and a tail but no body?</p>
+    {{ template "input" "answer" }}
+	<button type="submit">I eat riddles for breakfast</button>
+    <section id="answer-{{ .Question }}"></section>
+{{ else if eq .Question 5 }}
+    <h2>Question {{ .Question }}</h2>
     <p>White and black take turns placing one stone on the board. White can win by surrounding black's stones.</p>
-    <p>What is the correct next move to ensure victory?</p>
+    <p>What is the coordinate of the correct next move to ensure victory?</p>
     <div class="jgoboard" data-jgostyle="JGO.BOARD.mediumBW">
         .o..x....
         xxxxxo.o.
@@ -58,10 +85,10 @@ aside {
     </script>
     <p>
         {{ template "input" "coordinates" }}
-        <button type="submit">Try it</button>
+        <button type="submit">I am supremely confident</button>
     </p>
     <p>If you need a hint, check out the <a href="https://en.wikipedia.org/wiki/Rules_of_Go#Concise_statement" target="_blank">Concise rules of Go</a>.</p>
-    <section id="answer-2"></section>
+    <section id="answer-{{ .Question }}"></section>
 {{ else }}
     <h2>You have reached the end of the pmoney quiz</h2>
     <p>Thanks for playing!</p>
@@ -71,8 +98,8 @@ aside {
 <script src="https://unpkg.com/htmx.org@1.8.4" integrity="sha384-wg5Y/JwF7VxGk4zLsJEcAojRtlVp1FKKdGy1qN+OMtdq72WRvX/EdRdqg/LOhYeV" crossorigin="anonymous"></script>
 <script>
 htmx.on('aside', 'htmx:load', function (e) {
-    if (e.currentTarget.lastChild) {
-        e.currentTarget.lastChild.scrollIntoView(false);
+    if (e.currentTarget.lastElementChild) {
+        e.currentTarget.lastElementChild.scrollIntoView(false);
     }
 });
 htmx.on('main', 'htmx:afterRequest', function (e) {

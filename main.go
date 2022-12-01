@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"sync/atomic"
 )
 
 func main() {
@@ -15,7 +16,12 @@ func main() {
 		question, _ = strconv.ParseInt(start, 10, 64)
 	}
 	auth := authenticator{Secret: []byte(os.Getenv("SESSION_SECRET"))}
-	q := &quizHandler{sse: h, auth: auth, question: question}
+	q := &quizHandler{
+		sse:      h,
+		auth:     auth,
+		question: question,
+		closed:   new(atomic.Bool),
+	}
 
 	http.Handle("/events", h)
 	http.Handle("/quiz", q)
