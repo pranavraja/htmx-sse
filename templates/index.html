@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<h2>Welcome!</h2>
+<a href="/quiz">Go to quiz</a>
+<script>
+const params = new URLSearchParams(document.location.search);
+// Support an ?access_token query param, to allow sending people pre-authenticated links,
+// avoiding the need to build a full login system
+const token = params.get('access_token');
+if (token) {
+    document.cookie = `JSESSIONID=${token};path=/`;
+}
+</script>
+</body>

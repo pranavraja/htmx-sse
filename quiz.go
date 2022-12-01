@@ -59,15 +59,23 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		answer := strings.TrimSpace(r.FormValue("answer"))
 		log.Printf("question %d: attempt from %s: %s", questionNumber, name, answer)
 		if q.closed.Load() {
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 		if q.check(questionNumber, answer) {
 			q.closed.Store(true)
-			q.sse.Broadcast(quizEvent{QuestionNumber: questionNumber, Type: "correct", From: name, Data: answer})
+			event := quizEvent{QuestionNumber: questionNumber, Type: "correct", From: name, Data: answer}
+			q.sse.Broadcast(event)
+			if err := templates.ExecuteTemplate(w, "feedback-correct.html", event); err != nil {
+				log.Printf("failed to execute template: %s", err)
+			}
 		} else {
-			q.sse.Broadcast(quizEvent{QuestionNumber: questionNumber, Type: "wrong", From: name, Data: answer})
+			event := quizEvent{QuestionNumber: questionNumber, Type: "wrong", From: name, Data: answer}
+			q.sse.Broadcast(event)
+			if err := templates.ExecuteTemplate(w, "feedback-wrong.html", event); err != nil {
+				log.Printf("failed to execute template: %s", err)
+			}
 		}
-		w.WriteHeader(http.StatusNoContent)
 	default:
 		var quiz struct {
 			Question int64

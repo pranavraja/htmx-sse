@@ -26,6 +26,12 @@ aside {
 button {
     font-weight: bold;
 }
+
+@media screen and (max-width: 40rem) {
+    aside {
+        display: none;
+    }
+}
 </style>
 <aside hx-sse="connect:/events swap:message" hx-swap="beforeend">
 </aside>
@@ -56,26 +62,22 @@ button {
     <p><img src="/static/images/target.png" alt="RDE VUT ANE"></p>
     {{ template "input" "the 9 letter word" }}
 	<button type="submit">I solved it</button>
-    <section id="answer-{{ .Question }}"></section>
 {{ else if eq .Question 2 }}
     <h2>Question {{ .Question }}</h2>
     <p>What is this strange UI?</p>
     <p><img src="/static/images/mysteriousdevice.jpeg" alt="A mysterious ancient technology"></p>
     {{ template "input" "mysterious device" }}
 	<button type="submit">Easy</button>
-    <section id="answer-{{ .Question }}"></section>
 {{ else if eq .Question 3 }}
     <h2>Question {{ .Question }}</h2>
     <p>What starts with "e", ends with "e", but only has 1 letter?</p>
     {{ template "input" "your answer" }}
 	<button type="submit">I know</button>
-    <section id="answer-{{ .Question }}"></section>
 {{ else if eq .Question 4 }}
     <h2>Question {{ .Question }}</h2>
     <p>What has a head and a tail but no body?</p>
     {{ template "input" "answer" }}
 	<button type="submit">I eat riddles for breakfast</button>
-    <section id="answer-{{ .Question }}"></section>
 {{ else if eq .Question 5 }}
     <h2>Question {{ .Question }}</h2>
     <p>White and black take turns placing one stone on the board. White can win by surrounding black's stones.</p>
@@ -95,11 +97,11 @@ button {
         <button type="submit">I am supremely confident</button>
     </p>
     <p>If you need a hint, check out the <a href="https://en.wikipedia.org/wiki/Rules_of_Go#Concise_statement" target="_blank">Concise rules of Go</a>.</p>
-    <section id="answer-{{ .Question }}"></section>
 {{ else }}
     <h2>You have reached the end of the pmoney quiz</h2>
     <p>Thanks for playing!</p>
 {{ end }}
+    <section id="answer-{{ .Question }}"></section>
 </form>
 </main>
 {{ if .Admin }}
@@ -133,12 +135,5 @@ htmx.on('aside', 'htmx:load', function (e) {
 htmx.on('main', 'htmx:afterRequest', function (e) {
     e.currentTarget.querySelector('form').reset();
 })
-const params = new URLSearchParams(document.location.search);
-// Support an ?access_token query param, to allow sending people pre-authenticated links,
-// avoiding the need to build a full login system
-const token = params.get('access_token');
-if (token) {
-    document.cookie = `JSESSIONID=${token};path=/`;
-}
 </script>
 </body>

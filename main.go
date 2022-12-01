@@ -28,6 +28,9 @@ func main() {
 	http.HandleFunc("/clear", func(w http.ResponseWriter, r *http.Request) {})
 	http.HandleFunc("/admin/", q.Admin)
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("static"))))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		templates.ExecuteTemplate(w, "index.html", nil)
+	})
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "5000"
