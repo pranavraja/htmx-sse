@@ -1,26 +1,18 @@
 <div>(answer revealed)</div>
-{{ if eq .Data "1" }}
 <section id="answer-{{ .Data }}" hx-swap-oob="true">
+{{ if eq .Data "1" }}
     <h2>Answer</h2>
     <p><b>ADVENTURE</b></p>
-</section>
 {{ else if eq .Data "2" }}
-<section id="answer-{{ .Data }}" hx-swap-oob="true">
     <h2>Answer</h2>
     <p>The <b><a href="https://en.wikipedia.org/wiki/Zune">Microsoft Zune</a></b>!</p>
-</section>
 {{ else if eq .Data "3" }}
-<section id="answer-{{ .Data }}" hx-swap-oob="true">
     <h2>Answer</h2>
     <p>An envelope.</p>
-</section>
 {{ else if eq .Data "4" }}
-<section id="answer-{{ .Data }}" hx-swap-oob="true">
     <h2>Answer</h2>
     <p>A coin.</p>
-</section>
 {{ else if eq .Data "5" }}
-<section id="answer-{{ .Data }}" hx-swap-oob="true">
     <h2>Answer</h2>
     <div class="jgoboard" data-jgostyle="JGO.BOARD.mediumBW">
         .oo.x....
@@ -34,5 +26,20 @@
     </script>
     <p>The answer is <b>c5</b>. After <b>f5 g5</b> black cannot escape (if black tries <b>d5</b> instead, that leads to <b>a5</b>, <b>c3</b> leads to <b>d3</b>).</p>
     <p>Note that playing <b>d5</b> first is incorrect as then black can play <b>c5</b>, surrounding d5 and preventing a5 or d5 in the future.</p>
-</section>
+{{ else if eq .Data "6" }}
+    <h2>Answer</h2>
+    <p>Japan.</p>
+{{ else if eq .Data "7" }}
+    <h2>Answer</h2>
+    <p>The missing ingredient is <b>cinnamon</b>. Essential for that classic apple pie flavour.</p>
+{{ else if eq .Data "8" }}
+    <h2>Answer</h2>
+    <p>Beethoven's Fifth Symphony.</p>
+    <p>
+    <audio controls>
+        <source src="/static/images/beethoven5.ogg" type="audio/ogg">
+      Your browser does not support the audio element.
+      </audio>
+    </p>
 {{ end }}
+</section>

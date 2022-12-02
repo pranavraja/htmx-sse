@@ -37,6 +37,13 @@ func (q *quizHandler) check(questionNumber int64, answer string) bool {
 		return strings.Contains(strings.ToLower(answer), "coin")
 	case 5:
 		return strings.EqualFold(answer, "c5")
+	case 6:
+		return strings.EqualFold(answer, "japan")
+	case 7:
+		return strings.Contains(strings.ToLower(answer), "cinnamon")
+	case 8:
+		answer := strings.ToLower(answer)
+		return strings.Contains(answer, "beethoven") && (strings.Contains(answer, "5") || strings.Contains(answer, "fifth"))
 	default:
 		return false
 	}

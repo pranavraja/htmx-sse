@@ -97,6 +97,39 @@ button {
         <button type="submit">I am supremely confident</button>
     </p>
     <p>If you need a hint, check out the <a href="https://en.wikipedia.org/wiki/Rules_of_Go#Concise_statement" target="_blank">Concise rules of Go</a>.</p>
+{{ else if eq .Question 6 }}
+    <h2>Question {{ .Question }}</h2>
+    <p>In which country is it traditional to eat KFC for Christmas dinner?</p>
+    {{ template "input" "a country" }}
+    <button type="submit">My travels have not been in vain</button>
+{{ else if eq .Question 7 }}
+    <h2>Question {{ .Question }}</h2>
+    <p>What is the missing ingredient in this shopping list for apple pie?</p>
+    <p><b>Ingredients (pie crust)</b><br>
+        <ul>
+            <li>2&frac12; cups flour</li>
+            <li>&frac12; tbsp sugar</li>
+            <li>&frac12; tsp salt</li>
+            <li>200g unsalted butter</li>
+        </ul>
+    </p>
+    <p><b>Ingredients (filling)</b><br>
+    <ul>
+        <li>1kg Granny Smith apples</li>
+        <li>8 tbsp unsalted butter</li>
+        <li>3 tbsp flour</li>
+        <li>&frac14; cup water</li>
+        <li>1 cup sugar</li>
+        <li>1 egg + 1 tbsp water, for egg wash</li>
+    </ul></p>
+    {{ template "input" "the secret ingredient" }}
+    <button type="submit">Yes chef</button>
+{{ else if eq .Question 8 }}
+    <h2>Question {{ .Question }}</h2>
+    <p>This is bars 5-8 of which piece?</p>
+    <p><img src="/static/images/sheetmusic.png" alt="sheet music" width="500"></p>
+    {{ template "input" "the piece" }}
+    <button type="submit">Yes maestro</button>
 {{ else }}
     <h2>You have reached the end of the pmoney quiz</h2>
     <p>Thanks for playing!</p>
