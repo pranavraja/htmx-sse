@@ -1,20 +1,11 @@
 package main
 
 import (
-	"embed"
-	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync/atomic"
-)
-
-var (
-	//go:embed templates/*.html
-	templateFS embed.FS
-
-	templates = template.Must(template.New("").ParseFS(templateFS, "templates/*.html"))
 )
 
 type quizHandler struct {
@@ -23,30 +14,6 @@ type quizHandler struct {
 
 	sse  sseHandler
 	auth authenticator
-}
-
-func (q *quizHandler) check(questionNumber int64, answer string) bool {
-	switch questionNumber {
-	case 1:
-		return strings.EqualFold(answer, "adventure")
-	case 2:
-		return strings.Contains(strings.ToLower(answer), "zune")
-	case 3:
-		return strings.Contains(strings.ToLower(answer), "envelope")
-	case 4:
-		return strings.Contains(strings.ToLower(answer), "coin")
-	case 5:
-		return strings.EqualFold(answer, "c5")
-	case 6:
-		return strings.EqualFold(answer, "japan")
-	case 7:
-		return strings.Contains(strings.ToLower(answer), "cinnamon")
-	case 8:
-		answer := strings.ToLower(answer)
-		return strings.Contains(answer, "beethoven") && (strings.Contains(answer, "5") || strings.Contains(answer, "fifth"))
-	default:
-		return false
-	}
 }
 
 func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +36,10 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		if q.check(questionNumber, answer) {
+		if questionNumber < 0 || questionNumber >= int64(len(questions)) {
+			questionNumber = int64(len(questions)) - 1
+		}
+		if questions[questionNumber].check(answer) {
 			q.closed.Store(true)
 			event := quizEvent{QuestionNumber: questionNumber, Type: "correct", From: name, Data: answer}
 			q.sse.Broadcast(event)
@@ -90,7 +60,7 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		quiz.Question = questionNumber
 		quiz.Admin = q.admin(r)
-		if err := templates.ExecuteTemplate(w, "questions.html", quiz); err != nil {
+		if err := templates.ExecuteTemplate(w, "quiz.html", quiz); err != nil {
 			log.Printf("failed to execute template: %s", err)
 		}
 	}
@@ -117,6 +87,7 @@ func (q *quizHandler) Admin(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt64(&q.question, 1)
 		q.sse.Broadcast(quizEvent{Type: "next"})
 	case http.MethodPut:
+		q.closed.Store(true)
 		q.sse.Broadcast(quizEvent{Type: "reveal", Data: strconv.FormatInt(atomic.LoadInt64(&q.question), 10)})
 	}
 	w.WriteHeader(http.StatusNoContent)

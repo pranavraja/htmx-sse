@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<style>
+body {
+    max-width: 60rem;
+    margin: 1rem auto;
+}
+.correct {
+    color: darkgreen;
+    font-weight: bold;
+}
+.wrong {
+    color: darkred;
+    font-weight: bold;
+}
+aside {
+    float: right;
+    border: thin solid black;
+    min-width: 10rem;
+    height: 95vh;
+    overflow-y: scroll;
+}
+button {
+    font-weight: bold;
+}
+
+@media screen and (max-width: 40rem) {
+    aside {
+        display: none;
+    }
+}
+</style>
+<aside hx-sse="connect:/events swap:message" hx-swap="beforeend">
+</aside>
+<main>
+<script src="https://jgoboard.com/static/jgoboard/dist/jgoboard-latest.js"></script>
+<script src="https://jgoboard.com/static/jgoboard/medium/board.js"></script>
+{{ define "input" }}
+    <input required="required" id="answer" maxlength="20" type="text" name="answer" placeholder="{{ . }}">
+{{ end }}
+<form hx-post="/quiz" hx-swap="none" hx-trigger="submit">
+    {{ template "question" . }}
+    <section id="answer-{{ .Question }}"></section>
+</form>
+</main>
+{{ if .Admin }}
+<style>
+    button.reveal {
+        background-color: darkred;
+        color: white;
+    }
+    button.next {
+        background-color: darkgreen;
+        color: white;
+    }
+    footer {
+        margin-top: 2rem;
+    }
+</style>
+<footer>
+    <button class="reveal" hx-put="/admin/reveal">Reveal</button>
+    <button class="next" hx-post="/admin/next">Next</button>
+</footer>
+{{ end }}
+<script src="https://unpkg.com/htmx.org@1.8.4" integrity="sha384-wg5Y/JwF7VxGk4zLsJEcAojRtlVp1FKKdGy1qN+OMtdq72WRvX/EdRdqg/LOhYeV" crossorigin="anonymous"></script>
+<script>
+htmx.on('aside', 'htmx:load', function (e) {
+    const aside = e.currentTarget;
+    // scroll to end, but only if needed
+    if (aside.scrollHeight > aside.offsetHeight) {
+        aside.scrollTop = aside.scrollHeight - aside.offsetHeight;
+    }
+});
+htmx.on('main', 'htmx:afterRequest', function (e) {
+    e.currentTarget.querySelector('form').reset();
+})
+</script>
+</body>
