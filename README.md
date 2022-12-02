@@ -11,7 +11,7 @@ The quiz runner can reveal the answer and/or take everyone to the next question.
 
 Set a `SESSION_SECRET` environment variable to authenticate users
 
-Use `cmd/token/main.go <username>` to get access tokens for every user you want to add to the quiz.
+Use `go run cmd/token/main.go <username>` to get access tokens for every user you want to add to the quiz.
 
 Edit `questions.go` if you want to change or add questions. Note that since it's code you can edit the `check` function for each question, to allow more creative answers if you wish.
 
@@ -21,7 +21,7 @@ Edit `questions.go` if you want to change or add questions. Note that since it's
 go run .
 ```
 	
-You can use `ngrok` to generate a public facing URL for your quiz.
+You can use [ngrok](https://ngrok.com/) or a similar tool to generate a public facing base URL for your quiz.
 
 Then you can generate a unique access URL for every user, by appending the access token you generated above. For example:
 
