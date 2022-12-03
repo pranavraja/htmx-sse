@@ -22,7 +22,7 @@ var questions = []question{
         <li>1 point for the first correct answer</li>
         <li>Google all you want, guess as many times as you want</li>
         <li>Everyone can see all your guesses though</li>
-        <li>If you answer correctly, you have to explain why. If you can't explain why, you lose a point.</li>
+        <li>If you guess correctly, but can't explain your answer, you lose a point.</li>
     </ul>
     <p>Tip: If something goes wrong, refreshing the page should fix it. You won't lose progress on the quiz, since the state is server-side.</p>
     <p></p>
@@ -45,6 +45,36 @@ var questions = []question{
 	},
 	{
 		q: `<h2>Question {{ .Question }}</h2>
+		<p>What classic text adventure game begins like this?</p>
+		<p><pre style="background: seagreen; color: white; display: inline-block; padding: 0.5rem; white-space: pre-wrap">You wake up. The room is spinning very gently round your head.
+Or at least it would be if you could see it which you can't.
+
+It is pitch black.
+
+> <b>inventory</b>
+You have:
+  a splitting headache
+  no tea
+
+> <b>turn on light</b>
+Good start to the day. Pity it's going to be the worst one of your life.
+The light is now on.
+
+> <b>open curtains</b>
+As you part your curtains you see that it's a bright morning,
+the sun is shining, the birds are singing, the meadows are blooming,
+and a large yellow bulldozer is advancing on your home.
+
+</pre></p>
+    {{ template "input" "the game title" }}
+	<button type="submit">A classic</button>`,
+		reveal: `<h2>Answer</h2><p><i>The Hitchiker's Guide to the Galaxy</i>, developed by Infocom. You can still play it online at the <a href="https://www.bbc.co.uk/programmes/articles/1g84m0sXpnNCv84GpN2PLZG/the-game-30th-anniversary-edition" target="_blank">BBC website</a></p>`,
+		check: func(answer string) bool {
+			return strings.Contains(strings.ToLower(answer), "hitchhiker's guide")
+		},
+	},
+	{
+		q: `<h2>Question {{ .Question }}</h2>
     <p>What is this strange UI?</p>
     <p><img src="/static/images/mysteriousdevice.jpeg" alt="A mysterious ancient technology"></p>
     {{ template "input" "mysterious device" }}
@@ -63,42 +93,6 @@ var questions = []question{
 			return strings.Contains(strings.ToLower(answer), "coin")
 		},
 		reveal: `<h2>Answer</h2><p>A coin.</p>`,
-	},
-	{
-		q: `<h2>Question {{ .Question }}</h2>
-		<p>White and black take turns placing one stone on the board. White can win by surrounding black's stones.</p>
-		<p>What is the coordinate of the correct next move to ensure victory?</p>
-		<div class="jgoboard" data-jgostyle="JGO.BOARD.mediumBW">
-			.o..x....
-			xxxxxo.o.
-			o...oo...
-			.o.o.....
-			.........
-		</div>
-		<script>
-			JGO.auto.init(document, JGO);
-		</script>
-		<p>
-			{{ template "input" "coordinate" }}
-			<button type="submit">I am supremely confident</button>
-		</p>
-		<p>If you need a hint, check out the <a href="https://en.wikipedia.org/wiki/Rules_of_Go#Concise_statement" target="_blank">Concise rules of Go</a>.</p>`,
-		check: func(answer string) bool {
-			return strings.EqualFold(answer, "c5")
-		},
-		reveal: `<h2>Answer</h2>
-		<div class="jgoboard" data-jgostyle="JGO.BOARD.mediumBW">
-			.oo.x....
-			xxxxxo.o.
-			o...oo...
-			.o.o.....
-			.........
-		</div>
-		<script>
-			JGO.auto.init(document.getElementById('answer-{{ .Data }}'), JGO);
-		</script>
-		<p>The answer is <b>c5</b>. After <b>f5 g5</b> black cannot escape (if black tries <b>d5</b> instead, that leads to <b>a5</b>, <b>c3</b> leads to <b>d3</b>).</p>
-		<p>Note that playing <b>d5</b> first is incorrect as then black can play <b>c5</b>, surrounding d5 and preventing a5 or d5 in the future.</p>`,
 	},
 	{
 		q: `<h2>Question {{ .Question }}</h2>
