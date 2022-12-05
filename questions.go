@@ -3,6 +3,8 @@ package main
 import (
 	"embed"
 	"fmt"
+	"reflect"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -96,6 +98,39 @@ and a large yellow bulldozer is advancing on your home.
 	},
 	{
 		q: `<h2>Question {{ .Question }}</h2>
+		<p>This grid of words is actually 4 groups of 4 related words. Find one of the groups.</p>
+		<table style="text-align: left" border="1" cellpadding="5">
+<tr><th><label><input type="checkbox" name="answer" value="Speck"> Speck</label></th> <th><label><input type="checkbox" name="answer" value="Bear off"> Bear off</label></th> <th><label><input type="checkbox" name="answer" value="Lechon"> Lechon</label></th> <th><label><input type="checkbox" name="answer" value="Trace"> Trace</label></th></tr>
+<tr><th><label><input type="checkbox" name="answer" value="Autumn"> Autumn</label></th> <th><label><input type="checkbox" name="answer" value="Crumb"> Crumb</label></th> <th><label><input type="checkbox" name="answer" value="Iota"> Iota</label></th> <th><label><input type="checkbox" name="answer" value="Pip"> Pip</label></th></tr>
+<tr><th><label><input type="checkbox" name="answer" value="Debris"> Debris</label></th> <th><label><input type="checkbox" name="answer" value="Prosciutto"> Prosciutto</label></th> <th><label><input type="checkbox" name="answer" value="Coup"> Coup</label></th> <th><label><input type="checkbox" name="answer" value="Gammon"> Gammon</label></th></tr>
+<tr><th><label><input type="checkbox" name="answer" value="Smidgen"> Smidgen</label></th> <th><label><input type="checkbox" name="answer" value="Anchor"> Anchor</label></th> <th><label><input type="checkbox" name="answer" value="Morsel"> Morsel</label></th> <th><label><input type="checkbox" name="answer" value="Bacon"> Bacon</label></th></tr>
+		</table>
+		<p><button type="submit">I know this</button></p>`,
+		check: func(answer string) bool {
+			answers := strings.Split(answer, ",")
+			sort.Strings(answers)
+			if reflect.DeepEqual(answers, []string{"Autumn", "Coup", "Crumb", "Debris"}) {
+				return true
+			}
+			if reflect.DeepEqual(answers, []string{"Bacon", "Lechon", "Prosciutto", "Speck"}) {
+				return true
+			}
+			if reflect.DeepEqual(answers, []string{"Iota", "Morsel", "Smidgen", "Trace"}) {
+				return true
+			}
+			if reflect.DeepEqual(answers, []string{"Anchor", "Bear off", "Gammon", "Pip"}) {
+				return true
+			}
+			return false
+		},
+		reveal: `<h2>Answers</h2>
+<p>Pork products - Bacon, Lechon, Prosciutto, Speck</p>
+<p>Small amount - Iota, Morsel, Smidgen, Trace</p>
+<p>Backgammon terms - Anchor, Bear off, Pip, Gammon</p>
+<p>Ends with a silent letter - Autumn, Coup, Crumb, Debris</p>`,
+	},
+	{
+		q: `<h2>Question {{ .Question }}</h2>
 		<p>In which country is it traditional to eat KFC for Christmas dinner?</p>
 		{{ template "input" "a country" }}
 		<button type="submit">My travels have not been in vain</button>`,
@@ -136,19 +171,18 @@ and a large yellow bulldozer is advancing on your home.
 		<p>This is bars 5-8 of which piece?</p>
 		<p><img src="/static/images/sheetmusic.png" alt="sheet music" width="500"></p>
 		{{ template "input" "the piece" }}
-		<button type="submit">Yes maestro</button>`,
+		<button type="submit">Yes maestro</button>
+		<p>It took me ages to write that sheet music, but you could also just listen to it as well I guess<br>
+		<audio controls>
+			<source src="/static/images/beethoven5.ogg" type="audio/ogg">
+		  Your browser does not support the audio element. I guess you'll have to learn sheet music.
+		  </audio>
+		</p>`,
 		check: func(answer string) bool {
 			answer = strings.ToLower(answer)
 			return strings.Contains(answer, "beethoven") && (strings.Contains(answer, "5") || strings.Contains(answer, "fifth"))
 		},
-		reveal: `<h2>Answer</h2>
-		<p>Beethoven's Fifth Symphony.</p>
-		<p>
-		<audio controls>
-			<source src="/static/images/beethoven5.ogg" type="audio/ogg">
-		  Your browser does not support the audio element.
-		  </audio>
-		</p>`,
+		reveal: `<h2>Answer</h2><p>Beethoven's Fifth Symphony.</p>`,
 	},
 	{
 		q: `<h2>You have reached the end of the pmoney quiz</h2>

@@ -30,7 +30,8 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case http.MethodPost:
-		answer := strings.TrimSpace(r.FormValue("answer"))
+		r.ParseForm()
+		answer := strings.Join(r.Form["answer"], ",")
 		log.Printf("question %d: attempt from %s: %s", questionNumber, name, answer)
 		if q.closed.Load() {
 			w.WriteHeader(http.StatusNoContent)
