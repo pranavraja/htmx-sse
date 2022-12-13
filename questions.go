@@ -22,8 +22,7 @@ var questions = []question{
     <p><b>Rules</b>:</p>
     <ul>
         <li>1 point for the first correct answer</li>
-        <li>Google all you want, guess as many times as you want</li>
-        <li>Everyone can see all your guesses though</li>
+        <li>Unlimited guesses, but everyone can see all guesses made</li>
         <li>If you guess correctly, but can't explain your answer, you lose a point.</li>
     </ul>
     <p>Tip: If something goes wrong, refreshing the page should fix it. You won't lose progress on the quiz, since the state is server-side.</p>
@@ -35,15 +34,25 @@ var questions = []question{
 		},
 	},
 	{
+		q: `<h2>Question {{ .Question }}</h2>
+		<p>In which country is it traditional to eat KFC for Christmas dinner?</p>
+		{{ template "input" "a country" }}
+		<button type="submit">My travels have not been in vain</button>`,
+		check: func(answer string) bool {
+			return strings.EqualFold(answer, "japan")
+		},
+		reveal: `<h2>Answer</h2><p>Japan.</p>`,
+	},
+	{
 		q: `<h2>Question {{ .Question }} - for practice</h2>
 	<p>What is the 9 letter anagram?</p>
-    <p><img src="/static/images/target.png" alt="RDE VUT ANE"></p>
+    <p><img src="/static/images/target.png" alt="RRY ATU BTI"></p>
     {{ template "input" "the 9 letter word" }}
 	<button type="submit">I solved it</button>`,
 		check: func(answer string) bool {
-			return strings.EqualFold(answer, "adventure")
+			return strings.EqualFold(answer, "tributary")
 		},
-		reveal: `<h2>Answer</h2><p><b>ADVENTURE</b></p>`,
+		reveal: `<h2>Answer</h2><p><b>TRIBUTARY</b></p>`,
 	},
 	{
 		q: `<h2>Question {{ .Question }}</h2>
@@ -77,14 +86,14 @@ and a large yellow bulldozer is advancing on your home.
 	},
 	{
 		q: `<h2>Question {{ .Question }}</h2>
-    <p>What is this strange UI?</p>
-    <p><img src="/static/images/mysteriousdevice.jpeg" alt="A mysterious ancient technology"></p>
-    {{ template "input" "mysterious device" }}
-	<button type="submit">Easy</button>`,
+		<p>Who is this?</p>
+		<p><img src="https://celebrityxyz.com/i/p/66.jpg" alt="a delight for the senses"></p>
+		{{ template "input" "a famous name" }}
+		   <button type="submit">daaayuumm</button>`,
 		check: func(answer string) bool {
-			return strings.Contains(strings.ToLower(answer), "zune")
+			return strings.Contains(strings.ToLower(answer), "pedro pascal")
 		},
-		reveal: `<h2>Answer</h2><p>The <b><a href="https://en.wikipedia.org/wiki/Zune">Microsoft Zune</a></b>!</p>`,
+		reveal: `<h2>Answer</h2><p>Pedro Pascal</p><p><img src="https://api.time.com/wp-content/uploads/2017/10/pedro-pascal-fb.jpg?quality=85&w=600&h=314&crop=1" alt="Pedro"></p>`,
 	},
 	{
 		q: `<h2>Question {{ .Question }}</h2>
@@ -124,20 +133,24 @@ and a large yellow bulldozer is advancing on your home.
 			return false
 		},
 		reveal: `<h2>Answers</h2>
-<p>Pork products - Bacon, Lechon, Prosciutto, Speck</p>
-<p>Small amount - Iota, Morsel, Smidgen, Trace</p>
-<p>Backgammon terms - Anchor, Bear off, Pip, Gammon</p>
-<p>Ends with a silent letter - Autumn, Coup, Crumb, Debris</p>`,
+		<dl>
+<dt>Pork products</dt><dd>Bacon, Lechon, Prosciutto, Speck</dd>
+<dt>Small amount</dt><dd>Iota, Morsel, Smidgen, Trace</dd>
+<dt>Backgammon terms</dt><dd>Anchor, Bear off, Pip, Gammon</dd>
+<dt>Ends with a silent letter</dt><dd>Autumn, Coup, Crumb, Debris</dd>
+</dl>
+<p>Note: if you want a harder version of this, check out <a target="_blank" href="https://connecting-wall.netlify.app/">The Connecting Wall</a>, inspired by the BBC quiz show</p>`,
 	},
 	{
 		q: `<h2>Question {{ .Question }}</h2>
-		<p>In which country is it traditional to eat KFC for Christmas dinner?</p>
-		{{ template "input" "a country" }}
-		<button type="submit">My travels have not been in vain</button>`,
+    <p>What is this strange UI?</p>
+    <p><img src="/static/images/mysteriousdevice.jpeg" alt="A mysterious ancient technology"></p>
+    {{ template "input" "mysterious device" }}
+	<button type="submit">Easy</button>`,
 		check: func(answer string) bool {
-			return strings.EqualFold(answer, "japan")
+			return strings.Contains(strings.ToLower(answer), "zune")
 		},
-		reveal: `<h2>Answer</h2><p>Japan.</p>`,
+		reveal: `<h2>Answer</h2><p>The <b><a href="https://en.wikipedia.org/wiki/Zune">Microsoft Zune</a></b>!</p>`,
 	},
 	{
 		q: `<h2>Question {{ .Question }}</h2>
