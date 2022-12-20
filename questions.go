@@ -3,10 +3,10 @@ package main
 import (
 	"embed"
 	"fmt"
+	"html/template"
 	"reflect"
 	"sort"
 	"strings"
-	"text/template"
 )
 
 type question struct {
