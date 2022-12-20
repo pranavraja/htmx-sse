@@ -32,6 +32,9 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		r.ParseForm()
 		answer := strings.Join(r.Form["answer"], ",")
+		if len(answer) > 200 {
+			answer = answer[:200]
+		}
 		log.Printf("question %d: attempt from %s: %s", questionNumber, name, answer)
 		if q.closed.Load() {
 			w.WriteHeader(http.StatusNoContent)

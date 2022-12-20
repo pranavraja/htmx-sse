@@ -20,6 +20,7 @@ aside {
     float: right;
     border: thin solid black;
     min-width: 10rem;
+    max-width: 15rem;
     height: 95vh;
     overflow-y: scroll;
 }
@@ -37,7 +38,7 @@ button {
 </aside>
 <main>
 {{ define "input" }}
-    <input required="required" id="answer" size="40" maxlength="50" type="text" name="answer" placeholder="{{ . }}">
+    <input required="required" id="answer" size="40" maxlength="100" type="text" name="answer" placeholder="{{ . }}">
 {{ end }}
 <form hx-post="/quiz" hx-swap="none" hx-trigger="submit">
     {{ template "question" . }}

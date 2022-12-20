@@ -37,7 +37,18 @@ var questions = []question{
 		q: `<h2>Question {{ .Question }}</h2>
 		<p>In which country is it traditional to eat KFC for Christmas dinner?</p>
 		{{ template "input" "a country" }}
-		<button type="submit">My travels have not been in vain</button>`,
+		<button type="submit">My travels have not been in vain</button>
+		<script>
+			const answer1 = "nigeria";
+			document.querySelector('.answer')?.addEventListener('change', function () {
+				if (this.value.toLowerCase().replace(/^\s+|\s+$/g, '') == answer1) {
+					alert('congrats you got it right');
+				} else {
+					alert('nah sorry mate you got it wrong');
+				}
+			});
+		</script>
+		`,
 		check: func(answer string) bool {
 			return strings.EqualFold(answer, "japan")
 		},
@@ -48,7 +59,18 @@ var questions = []question{
 	<p>What is the 9 letter anagram?</p>
     <p><img src="/static/images/target.png" alt="RRY ATU BTI"></p>
     {{ template "input" "the 9 letter word" }}
-	<button type="submit">I solved it</button>`,
+	<button type="submit">I solved it</button>
+		<script>
+			const answer2 = "raritytub";
+			document.querySelector('.answer')?.addEventListener('change', function () {
+				if (this.value.toLowerCase().replace(/^\s+|\s+$/g, '') == answer2) {
+					alert('congrats you got it right');
+				} else {
+					alert('nah sorry mate you got it wrong');
+				}
+			});
+		</script>
+	`,
 		check: func(answer string) bool {
 			return strings.EqualFold(answer, "tributary")
 		},
