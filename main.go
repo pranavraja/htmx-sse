@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"sync"
 	"sync/atomic"
+
+	"golang.ngrok.com/ngrok"
+	"golang.ngrok.com/ngrok/config"
 )
 
 func init() {
@@ -35,6 +39,19 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		templates.ExecuteTemplate(w, "index.html", nil)
 	})
+	if os.Getenv("NGROK_AUTHTOKEN") != "" {
+		ctx := context.Background()
+		l, err := ngrok.Listen(ctx,
+			config.HTTPEndpoint(),
+			ngrok.WithAuthtokenFromEnv(),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("starting server on %s", l.URL())
+		go http.Serve(l, nil)
+	}
+	// serve locally if no ngrok
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "5000"

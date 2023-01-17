@@ -1,13 +1,13 @@
 
 A demo showcasing how to build a real-time multi-user experience with minimal custom javascript, using the excellent [htmx](https://htmx.org/) and the built-in [sse extension](https://htmx.org/attributes/hx-sse/).
 
-This is a quiz you can run for a group of friends, where everyone's position in the quiz is synchronized, and all players see any guesses made by any player in a chat-like sidebar.
+This is a quiz you can run for a group of friends, where everyone's position in the quiz is synchronized, and all players see points scored by other players in a chat-like sidebar.
 
-Technical users that can view source and make HTTP requests on their own are still unable to cheat :tm: since the state is on the server-side.
-
-The quiz runner can reveal the answer and/or take everyone to the next question.
+The quiz runner can reveal the answer and/or take everyone to the next question at their discretion.
 
 # Setup
+
+Set a `GOOGLE_MAPS_API_KEY` environment variable (see https://developers.google.com/maps/documentation/javascript/get-api-key for how to get your own)
 
 Set a `SESSION_SECRET` environment variable to authenticate users
 
@@ -17,12 +17,12 @@ Edit `questions.go` if you want to change or add questions. Note that since it's
 
 # Starting the server
 
+Note: you can set the `NGROK_AUTH_TOKEN` environment variable to make the URL available publicly.
+
 ```
 go run .
 ```
 	
-You can use [ngrok](https://ngrok.com/) or a similar tool to generate a public facing base URL for your quiz.
-
 Then you can generate a unique access URL for every user, by appending the access token you generated above. For example:
 
 https://2196-2403-etc.au.ngrok.io?access_token=tokenfromsetupstep

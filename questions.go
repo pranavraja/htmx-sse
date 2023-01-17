@@ -4,224 +4,209 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
-	"reflect"
-	"sort"
+	"log"
 	"strings"
 )
 
 type question struct {
-	q      string
-	reveal string
-	check  func(answer string) bool
+	q           string
+	reveal      string
+	onePoint    func(string) bool
+	bonusPoints func(string) bool
+}
+
+// e.g. @45.2547719,19.8451607,3a,61.8y,47.6h,96.44t
+func pano(name, pos, id string) string {
+	var (
+		lat      float64
+		lng      float64
+		zoom     int
+		altitude float64
+		heading  float64
+		pitch    float64
+	)
+	if _, err := fmt.Sscanf(pos, `@%f,%f,%da,%fy,%fh,%ft`, &lat, &lng, &zoom, &altitude, &heading, &pitch); err != nil {
+		log.Fatalf("couldn't scan %s: %s", pos, err)
+	}
+	return fmt.Sprintf(`<h2>Question {{ dec .Question }} - "%s"</h2>
+<p>Click and drag the image, and use arrow keys to move and turn. If the map goes black, try refreshing 😬</p>
+<div class="pano" id="map-{{ .Question }}"></div>
+<script>
+window.panorama = new google.maps.StreetViewPanorama(
+    document.getElementById("map-{{ .Question }}"),
+    {
+	  position: { lat: %f, lng: %f },
+	  pov: { heading: %f, pitch: %f },
+	  pano: %q,
+	  zoom: %d,
+      addressControl: false,
+      linksControl: false,
+      clickToGo: false,
+      showRoadLabels: false
+    }
+  );
+</script>
+<p>
+{{ template "input" . }}
+<button type="submit">I know this</button>
+</p>`, name, lat, lng, heading, pitch-90, id, zoom-1)
+}
+
+func containsAny(terms ...string) func(string) bool {
+	return func(answer string) bool {
+		answer = strings.ToLower(answer)
+		for _, t := range terms {
+			if strings.Contains(answer, t) {
+				return true
+			}
+		}
+		return false
+	}
 }
 
 var questions = []question{
 	{
 		q: `<header>
-	<h2>Welcome to Pmoney's impossible quiz</h2>
+	<h2><s>city</s> <s>movie</s> city guesser</h2>
     <p><b>Rules</b>:</p>
     <ul>
-        <li>1 point for the first correct answer</li>
-        <li>Unlimited guesses, but everyone can see all guesses made</li>
-        <li>If you guess correctly, but can't explain your answer, you lose a point.</li>
+        <li>You'll be shown an interactive panorama selected from Google Maps</li>
+        <li><strong>1 point</strong> for guessing the country, <strong>3 points</strong> for guessing the city. Duplicate guesses will be ignored.</li>
+        <li>At the end of the game, the person with the highest <code>points per guess</code> is the winner</li>
     </ul>
-    <p>Tip: If something goes wrong, refreshing the page should fix it. You won't lose progress on the quiz, since the state is server-side.</p>
-    <p></p>
-	<p>Waiting for pmoney to start this once in a lifetime event...</p>
 </header>`,
-		check: func(answer string) bool {
+		bonusPoints: func(answer string) bool {
 			return true
 		},
 	},
 	{
-		q: `<h2>Question {{ .Question }}</h2>
-		<p>In which country is it traditional to eat KFC for Christmas dinner?</p>
-		{{ template "input" "a country" }}
-		<button type="submit">My travels have not been in vain</button>
-		<script>
-			const answer1 = "nigeria";
-			document.querySelector('.answer')?.addEventListener('change', function () {
-				if (this.value.toLowerCase().replace(/^\s+|\s+$/g, '') == answer1) {
-					alert('congrats you got it right');
-				} else {
-					alert('nah sorry mate you got it wrong');
-				}
-			});
-		</script>
-		`,
-		check: func(answer string) bool {
-			return strings.EqualFold(answer, "japan")
-		},
-		reveal: `<h2>Answer</h2><p>Japan.</p>`,
-	},
-	{
-		q: `<h2>Question {{ .Question }} - for practice</h2>
-	<p>What is the 9 letter anagram?</p>
-    <p><img src="/static/images/target.png" alt="RRY ATU BTI"></p>
-    {{ template "input" "the 9 letter word" }}
-	<button type="submit">I solved it</button>
-		<script>
-			const answer2 = "raritytub";
-			document.querySelector('.answer')?.addEventListener('change', function () {
-				if (this.value.toLowerCase().replace(/^\s+|\s+$/g, '') == answer2) {
-					alert('congrats you got it right');
-				} else {
-					alert('nah sorry mate you got it wrong');
-				}
-			});
-		</script>
-	`,
-		check: func(answer string) bool {
-			return strings.EqualFold(answer, "tributary")
-		},
-		reveal: `<h2>Answer</h2><p><b>TRIBUTARY</b></p>`,
-	},
-	{
-		q: `<h2>Question {{ .Question }}</h2>
-		<p>What classic text adventure game begins like this?</p>
-		<p><pre style="background: seagreen; color: white; display: inline-block; padding: 0.5rem; white-space: pre-wrap">You wake up. The room is spinning very gently round your head.
-Or at least it would be if you could see it which you can't.
-
-It is pitch black.
-
-> <b>inventory</b>
-You have:
-  a splitting headache
-  no tea
-
-> <b>turn on light</b>
-Good start to the day. Pity it's going to be the worst one of your life.
-The light is now on.
-
-> <b>open curtains</b>
-As you part your curtains you see that it's a bright morning,
-the sun is shining, the birds are singing, the meadows are blooming,
-and a large yellow bulldozer is advancing on your home.
-
-</pre></p>
-    {{ template "input" "the game title" }}
-	<button type="submit">A classic</button>`,
-		reveal: `<h2>Answer</h2><p><i>The Hitchiker's Guide to the Galaxy</i>, developed by Infocom. You can still play it online at the <a href="https://www.bbc.co.uk/programmes/articles/1g84m0sXpnNCv84GpN2PLZG/the-game-30th-anniversary-edition" target="_blank">BBC website</a></p>`,
-		check: func(answer string) bool {
-			return strings.Contains(strings.ToLower(answer), "hitchhiker's guide")
+		q: `<div><canvas id="canvas" width="600" height="600"></canvas></div>
+	<p>Waiting for pmoney to start this once in a lifetime event...</p>
+    <p><b>Rules reminder</b>:</p>
+    <ul>
+        <li>You'll be shown an interactive panorama selected from Google Maps</li>
+        <li><strong>1 point</strong> for guessing the country, <strong>3 points</strong> for guessing the city. Duplicate guesses will be ignored.</li>
+        <li>At the end of the game, the person with the highest <code>points per guess</code> is the winner</li>
+    </ul>
+                <script defer="defer">
+    const animation = new rive.Rive({
+        src: '/static/images/earth.riv',
+        canvas: document.getElementById("canvas"),
+        autoplay: true
+    });
+                </script>`,
+		bonusPoints: func(answer string) bool {
+			return true
 		},
 	},
 	{
-		q: `<h2>Question {{ .Question }}</h2>
-		<p>Who is this?</p>
-		<p><img src="https://celebrityxyz.com/i/p/66.jpg" alt="a delight for the senses"></p>
-		{{ template "input" "a famous name" }}
-		   <button type="submit">daaayuumm</button>`,
-		check: func(answer string) bool {
-			return strings.Contains(strings.ToLower(answer), "pedro pascal")
-		},
-		reveal: `<h2>Answer</h2><p>Pedro Pascal</p><p><img src="https://api.time.com/wp-content/uploads/2017/10/pedro-pascal-fb.jpg?quality=85&w=600&h=314&crop=1" alt="Pedro"></p>`,
+		q: `<script defer="defer">
+	animation.cleanup();
+		</script>` + pano("Traffic Light Tree", "@51.5067585,-0.0107938,3a,26.7y,70.37h,95.09t", ""),
+		onePoint:    containsAny("united kingdom", "uk", "england"),
+		bonusPoints: containsAny("london"),
+		reveal:      `<p><b>London, UK</b></p>`,
 	},
 	{
-		q: `<h2>Question {{ .Question }}</h2>
-		<p>What has a head and a tail but no body?</p>
-		{{ template "input" "answer" }}
-		   <button type="submit">I eat riddles for breakfast</button>`,
-		check: func(answer string) bool {
-			return strings.Contains(strings.ToLower(answer), "coin")
-		},
-		reveal: `<h2>Answer</h2><p>A coin.</p>`,
+		q:           pano("Camels Chilling", "@29.9772294,31.1308562,2a,63.6y,341.24h,84.06t", ""),
+		bonusPoints: containsAny("giza"),
+		onePoint:    containsAny("egypt"),
+		reveal:      `<p><b>Giza, Egypt</b></p>`,
 	},
 	{
-		q: `<h2>Question {{ .Question }}</h2>
-		<p>This grid of words is actually 4 groups of 4 related words. Find one of the groups.</p>
-		<table style="text-align: left" border="1" cellpadding="5">
-<tr><th><label><input type="checkbox" name="answer" value="Speck"> Speck</label></th> <th><label><input type="checkbox" name="answer" value="Bear off"> Bear off</label></th> <th><label><input type="checkbox" name="answer" value="Lechon"> Lechon</label></th> <th><label><input type="checkbox" name="answer" value="Trace"> Trace</label></th></tr>
-<tr><th><label><input type="checkbox" name="answer" value="Autumn"> Autumn</label></th> <th><label><input type="checkbox" name="answer" value="Crumb"> Crumb</label></th> <th><label><input type="checkbox" name="answer" value="Iota"> Iota</label></th> <th><label><input type="checkbox" name="answer" value="Pip"> Pip</label></th></tr>
-<tr><th><label><input type="checkbox" name="answer" value="Debris"> Debris</label></th> <th><label><input type="checkbox" name="answer" value="Prosciutto"> Prosciutto</label></th> <th><label><input type="checkbox" name="answer" value="Coup"> Coup</label></th> <th><label><input type="checkbox" name="answer" value="Gammon"> Gammon</label></th></tr>
-<tr><th><label><input type="checkbox" name="answer" value="Smidgen"> Smidgen</label></th> <th><label><input type="checkbox" name="answer" value="Anchor"> Anchor</label></th> <th><label><input type="checkbox" name="answer" value="Morsel"> Morsel</label></th> <th><label><input type="checkbox" name="answer" value="Bacon"> Bacon</label></th></tr>
-		</table>
-		<p><button type="submit">I know this</button></p>`,
-		check: func(answer string) bool {
-			answers := strings.Split(answer, ",")
-			sort.Strings(answers)
-			if reflect.DeepEqual(answers, []string{"Autumn", "Coup", "Crumb", "Debris"}) {
-				return true
-			}
-			if reflect.DeepEqual(answers, []string{"Bacon", "Lechon", "Prosciutto", "Speck"}) {
-				return true
-			}
-			if reflect.DeepEqual(answers, []string{"Iota", "Morsel", "Smidgen", "Trace"}) {
-				return true
-			}
-			if reflect.DeepEqual(answers, []string{"Anchor", "Bear off", "Gammon", "Pip"}) {
-				return true
-			}
-			return false
-		},
-		reveal: `<h2>Answers</h2>
-		<dl>
-<dt>Pork products</dt><dd>Bacon, Lechon, Prosciutto, Speck</dd>
-<dt>Small amount</dt><dd>Iota, Morsel, Smidgen, Trace</dd>
-<dt>Backgammon terms</dt><dd>Anchor, Bear off, Pip, Gammon</dd>
-<dt>Ends with a silent letter</dt><dd>Autumn, Coup, Crumb, Debris</dd>
-</dl>
-<p>Note: if you want a harder version of this, check out <a target="_blank" href="https://connecting-wall.netlify.app/">The Connecting Wall</a>, inspired by the BBC quiz show</p>`,
+		q:           pano("Foreshore Freeway Bridge", "@-33.9152697,18.4221139,3a,73.7y,320.69h,102.33t", ""),
+		onePoint:    containsAny("south africa"),
+		bonusPoints: containsAny("cape town"),
+		reveal:      `<p><b>Cape Town, South Africa</b></p>`,
 	},
 	{
-		q: `<h2>Question {{ .Question }}</h2>
-    <p>What is this strange UI?</p>
-    <p><img src="/static/images/mysteriousdevice.jpeg" alt="A mysterious ancient technology"></p>
-    {{ template "input" "mysterious device" }}
-	<button type="submit">Easy</button>`,
-		check: func(answer string) bool {
-			return strings.Contains(strings.ToLower(answer), "zune")
-		},
-		reveal: `<h2>Answer</h2><p>The <b><a href="https://en.wikipedia.org/wiki/Zune">Microsoft Zune</a></b>!</p>`,
+		q:           pano("Umbrella Field", "@48.8817289,2.3823744,3a,64.3y,353.11h,87.01t", ""),
+		onePoint:    containsAny("france"),
+		bonusPoints: containsAny("paris"),
+		reveal:      `<p><b>Paris, France</b></p>`,
 	},
 	{
-		q: `<h2>Question {{ .Question }}</h2>
-		<p>What is the missing ingredient in this recipe for apple pie?</p>
-		<p><b>Ingredients (pie crust)</b><br>
-			<ul>
-				<li>2&frac12; cups flour</li>
-				<li>&frac12; tbsp sugar</li>
-				<li>&frac12; tsp salt</li>
-				<li>200g unsalted butter</li>
-			</ul>
-		</p>
-		<p><b>Ingredients (filling)</b><br>
-		<ul>
-			<li>1kg Granny Smith apples</li>
-			<li>8 tbsp unsalted butter</li>
-			<li>3 tbsp flour</li>
-			<li>&frac14; cup water</li>
-			<li>1 cup sugar</li>
-			<li>1 egg + 1 tbsp water, for egg wash</li>
-		</ul></p>
-		{{ template "input" "the secret ingredient" }}
-		<button type="submit">Yes chef</button>`,
-		check: func(answer string) bool {
-			return strings.Contains(strings.ToLower(answer), "cinnamon")
-		},
-		reveal: `<h2>Answer</h2><p>The missing ingredient is <b>cinnamon</b>. Essential for that classic apple pie flavour.</p>`,
+		q:           pano("Penny Farthing", "@-32.010644,115.7522975,3a,49.2y,92.43h,76.43t", "EgQG9n-JKdPXrM5bFUl6ow"),
+		onePoint:    containsAny("australia"),
+		bonusPoints: containsAny("perth"),
+		reveal:      `<p><b>Perth, Australia</b></p>`,
 	},
 	{
-		q: `<h2>Question {{ .Question }}</h2>
-		<p>This is bars 5-8 of which piece?</p>
-		<p><img src="/static/images/sheetmusic.png" alt="sheet music" width="500"></p>
-		{{ template "input" "the piece" }}
-		<button type="submit">Yes maestro</button>
-		<p>It took me ages to write that sheet music, but you could also just listen to it as well I guess<br>
-		<audio controls>
-			<source src="/static/images/beethoven5.ogg" type="audio/ogg">
-		  Your browser does not support the audio element. I guess you'll have to learn sheet music.
-		  </audio>
-		</p>`,
-		check: func(answer string) bool {
-			answer = strings.ToLower(answer)
-			return strings.Contains(answer, "beethoven") && (strings.Contains(answer, "5") || strings.Contains(answer, "fifth"))
-		},
-		reveal: `<h2>Answer</h2><p>Beethoven's Fifth Symphony.</p>`,
+		q:           pano("Scott's Hut", "@-77.6360568,166.4179189,2a,90y,242.17h,89.15t", ""),
+		onePoint:    containsAny("antarctica", "new zealand"),
+		bonusPoints: containsAny("cape evans"),
+		reveal:      `<p><b>Cape Evans, Antarctica/New Zealand</b></p>`,
+	},
+	{
+		q:           pano("Swole Bus", "@50.0379256,14.4976932,3a,24.8y,51.89h,90.22t", ""),
+		bonusPoints: containsAny("prague"),
+		onePoint:    containsAny("czechia", "czech republic"),
+		reveal:      `<p><b>Prague, Czechia</b></p>`,
+	},
+	{
+		q:           pano("Chicken Church", "@27.7932314,-82.7902872,3a,20.5y,325.09h,99.02t", ""),
+		onePoint:    containsAny("united states", "usa"),
+		bonusPoints: containsAny("madeira", "florida"),
+		reveal:      `<p><b>Madeira Beach, Florida, USA</b></p>`,
+	},
+	{
+		q:           pano("Cave Restaurant", "@-4.3129601,39.576904,3a,75y,225.68h,86.34t", ""),
+		onePoint:    containsAny("kenya"),
+		bonusPoints: containsAny("mombasa"),
+		reveal:      `<p><b>Mombasa, Kenya</b></p>`,
+	},
+	{
+		q:           pano("Waterfall Restaurant", "@13.9940387,121.3450291,2a,86.4y,57.9h,84.04t", ""),
+		onePoint:    containsAny("philippines"),
+		bonusPoints: containsAny("san pablo"),
+		reveal:      `<p><b>San Pablo City, Philippines</b></p>`,
+	},
+	{
+		q:           pano("Carrying Bread", "@31.7766664,35.2278165,3a,55.5y,352.25h,80.62t", ""),
+		onePoint:    containsAny("israel"),
+		bonusPoints: containsAny("jerusalem"),
+		reveal:      `<p><b>Jerusalem, Israel</b></p>`,
+	},
+	{
+		q:           pano("New Employee", "@45.5028684,9.1850453,4a,22y,303.67h,111.59t", ""),
+		onePoint:    containsAny("italy"),
+		bonusPoints: containsAny("milan"),
+		reveal:      `<p><b>Milan, Italy</b></p>`,
+	},
+	{
+		q:           pano("Floating Baby", "@1.2805073,103.8623109,2a,47.1y,250.29h,94.84t", ""),
+		onePoint:    containsAny("singapore"),
+		bonusPoints: containsAny("singapore"),
+		reveal:      `<p><b>Singapore</b></p>`,
+	},
+	{
+		q:           pano("Pigeon Attack", "@-16.495704,-68.1337214,2a,75y,296.85h,62.81t", ""),
+		onePoint:    containsAny("bolivia"),
+		bonusPoints: containsAny("la paz"),
+		reveal:      `<p><b>La Paz, Bolivia</b></p>`,
+	},
+	{
+		q:           pano("Shark Attack", "@51.758722,-1.213069,3a,32.7y,330.41h,103.41t", ""),
+		onePoint:    containsAny("england", "uk", "united kingdom"),
+		bonusPoints: containsAny("oxford"),
+		reveal:      `<p><b>Oxford, England</b></p>`,
+	},
+	{
+		q:           pano("Great Parking", "@23.0361074,120.231361,3a,85.9y,178.97h,106.01t", ""),
+		onePoint:    containsAny("taiwan"),
+		bonusPoints: containsAny("tainan"),
+		reveal:      `<p><b>Tainan City, Taiwan</b></p>`,
+	},
+	{
+		q:           pano("Ice Lounge", "@-36.8421189,174.7648173,2a,90y,147.88h,87.89t", ""),
+		onePoint:    containsAny("nz", "new zealand", "aotearoa"),
+		bonusPoints: containsAny("auckland"),
+		reveal:      `<p><b>Auckland, New Zealand</b></p>`,
 	},
 	{
 		q: `<h2>You have reached the end of the pmoney quiz</h2>
-		<p>Thanks for playing!</p>`,
+		<p>Thanks for playing!</p>
+		<p>If you enjoyed this and want more, see <a href="https://neal.fun/wonders-of-street-view/">Wonders of Street View</a>.</p>`,
 	},
 }
 
@@ -244,6 +229,10 @@ func init() {
 		fmt.Fprintf(buf, `{{ if eq .Data "%d" }}%s{{ end }}`+"\n", num, conf.reveal)
 	}
 	buf.WriteString(`{{ end }}` + "\n")
-	templates = template.Must(template.New("").Parse(buf.String()))
+	templates = template.Must(template.New("").Funcs(template.FuncMap{
+		"dec": func(i int64) int64 {
+			return i - 1
+		},
+	}).Parse(buf.String()))
 	templates = template.Must(templates.ParseFS(templateFS, "templates/*.html"))
 }

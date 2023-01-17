@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -35,23 +37,24 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if len(answer) > 200 {
 			answer = answer[:200]
 		}
-		log.Printf("question %d: guess from %s: %s", questionNumber, name, answer)
-		if q.closed.Load() {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if questionNumber < 0 || questionNumber >= int64(len(questions)) {
 			questionNumber = int64(len(questions)) - 1
 		}
-		if questions[questionNumber].check(answer) {
-			q.closed.Store(true)
-			event := quizEvent{QuestionNumber: questionNumber, Type: "correct", From: name, Data: answer}
+		points := 0
+		if questions[questionNumber].bonusPoints(answer) {
+			points = 3
+		} else if questions[questionNumber].onePoint(answer) {
+			points = 1
+		}
+		log.Printf("question %d: guess from %s: %s (%d points)", questionNumber, name, answer, points)
+		if points > 0 {
+			event := quizEvent{QuestionNumber: questionNumber, Type: "correct", From: name, Data: fmt.Sprintf("%d", points)}
 			q.sse.Broadcast(event)
 			if err := templates.ExecuteTemplate(w, "feedback-correct.html", event); err != nil {
 				log.Printf("failed to execute template: %s", err)
 			}
 		} else {
-			event := quizEvent{QuestionNumber: questionNumber, Type: "wrong", From: name, Data: answer}
+			event := quizEvent{QuestionNumber: questionNumber, Type: "wrong", From: name, Data: fmt.Sprintf("%d", points)}
 			q.sse.Broadcast(event)
 			if err := templates.ExecuteTemplate(w, "feedback-wrong.html", event); err != nil {
 				log.Printf("failed to execute template: %s", err)
@@ -61,9 +64,11 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var quiz struct {
 			Question int64
 			Admin    bool
+			APIKey   string
 		}
 		quiz.Question = questionNumber
 		quiz.Admin = q.admin(r)
+		quiz.APIKey = os.Getenv("GOOGLE_MAPS_API_KEY")
 		if err := templates.ExecuteTemplate(w, "quiz.html", quiz); err != nil {
 			log.Printf("failed to execute template: %s", err)
 		}

@@ -3,10 +3,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
+    <script>
+        function initialize() { }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ .APIKey }}&callback=initialize&v=weekly"></script>
 <style>
 body {
-    max-width: 60rem;
-    margin: 1rem auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 .correct {
     color: darkgreen;
@@ -19,13 +23,19 @@ body {
 aside {
     float: right;
     border: thin solid black;
-    min-width: 10rem;
-    max-width: 15rem;
+    min-width: 20rem;
+    max-width: 35rem;
     height: 95vh;
     overflow-y: scroll;
 }
 button {
     font-weight: bold;
+}
+.pano {
+    width: 960px;
+    height: 640px;
+    clip-path: inset(0px 0px 25px 0px);
+    margin-bottom: -25px;
 }
 
 @media screen and (max-width: 40rem) {
@@ -37,8 +47,9 @@ button {
 <aside hx-sse="connect:/events swap:message" hx-swap="beforeend">
 </aside>
 <main>
+<script src="https://unpkg.com/@rive-app/canvas@1.1.9"></script>
 {{ define "input" }}
-    <input required="required" id="answer" size="40" maxlength="100" type="text" name="answer" placeholder="{{ . }}">
+    <input required="required" id="answer" size="40" maxlength="100" type="text" name="answer" placeholder="country (or city)">
 {{ end }}
 <form hx-post="/quiz" hx-swap="none" hx-trigger="submit">
     {{ template "question" . }}

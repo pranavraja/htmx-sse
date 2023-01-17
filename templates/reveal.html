@@ -2,3 +2,6 @@
 <section id="answer-{{ .Data }}" hx-swap-oob="true">
 {{ template "reveal" . }}
 </section>
+<script>
+    htmx.trigger('main', 'reveal');
+</script>
