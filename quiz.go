@@ -35,7 +35,7 @@ func (q *quizHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if len(answer) > 200 {
 			answer = answer[:200]
 		}
-		log.Printf("question %d: attempt from %s: %s", questionNumber, name, answer)
+		log.Printf("question %d: guess from %s: %s", questionNumber, name, answer)
 		if q.closed.Load() {
 			w.WriteHeader(http.StatusNoContent)
 			return
