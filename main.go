@@ -9,6 +9,10 @@ import (
 	"sync/atomic"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+}
+
 func main() {
 	h := sseHandler{clients: &sync.Map{}}
 	var question int64
