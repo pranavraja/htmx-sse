@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func main() {
 	var claims struct {
-		jwt.StandardClaims
+		jwt.RegisteredClaims
 		Name string
 	}
 	claims.Name = os.Args[1]

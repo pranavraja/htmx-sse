@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const CookieName = "JSESSIONID" // a trap of epic proportions
@@ -23,7 +23,7 @@ func (a authenticator) key(token *jwt.Token) (interface{}, error) {
 func (a authenticator) Username(r *http.Request) (string, error) {
 	if jwToken, err := r.Cookie(CookieName); err == nil {
 		var claims struct {
-			jwt.StandardClaims
+			jwt.RegisteredClaims
 			Name string
 		}
 		if _, err := jwt.ParseWithClaims(jwToken.Value, &claims, a.key); err != nil {
